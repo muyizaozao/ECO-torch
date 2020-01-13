@@ -6,7 +6,7 @@ import yaml
 import os
 
 class ECO(nn.Module):                   # 이부분 자기 경로
-    def __init__(self, model_path='./ECO_JH/ECO-pytorch/tf_model_zoo/ECO/ECO.yaml', num_classes=101,
+    def __init__(self, model_path = '/app/ECO-torch/tf_model_zoo/ECO/ECO.yaml', num_classes=101,
                        num_segments=4, pretrained_parts='both'):
 
         super(ECO, self).__init__()
