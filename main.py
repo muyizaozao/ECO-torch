@@ -2,7 +2,6 @@ import argparse
 import os
 import time
 import shutil
-import torch
 import torchvision
 import torch.nn.parallel
 import torch.backends.cudnn as cudnn
@@ -19,8 +18,10 @@ from torch.nn.init import constant_, xavier_uniform_
 
 best_prec1 = 0
 
-os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "3"
+import torch
+
+# os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 
 
 def main():
@@ -74,7 +75,8 @@ def main():
 
     train_augmentation = model.get_augmentation()
 
-    model = torch.nn.DataParallel(model, device_ids=args.gpus).cuda()
+    model = torch.nn.DataParallel(model, device_ids=args.gpus)
+    # model = torch.nn.DataParallel(model, device_ids=args.gpus).cuda()
 
     model_dict = model.state_dict()
 
@@ -145,7 +147,7 @@ def main():
         data_length = 5
 
     train_loader = torch.utils.data.DataLoader(
-        TSNDataSet("./ECO_JH/ECO-pytorch", args.train_list, num_segments=args.num_segments,
+        TSNDataSet("/app/ECO-torch", args.train_list, num_segments=args.num_segments,
                    new_length=data_length,
                    modality=args.modality,
                    image_tmpl=args.rgb_prefix+rgb_read_format if args.modality in ["RGB", "RGBDiff"] else args.flow_prefix+rgb_read_format,
@@ -159,7 +161,7 @@ def main():
         num_workers=args.workers, pin_memory=True)
 
     val_loader = torch.utils.data.DataLoader(
-        TSNDataSet("./ECO_JH/ECO-pytorch", args.val_list, num_segments=args.num_segments,
+        TSNDataSet("/app/ECO-torch", args.val_list, num_segments=args.num_segments,
                    new_length=data_length,
                    modality=args.modality,
                    image_tmpl=args.rgb_prefix+rgb_read_format if args.modality in ["RGB", "RGBDiff"] else args.flow_prefix+rgb_read_format,
@@ -280,15 +282,18 @@ def init_ECO(model_dict):
         print("88"*40)
 
         #junho
-        pretrained_dict = torch.load("./ECO_JH/ECO-pytorch/models/ECO_Lite_rgb_model_Kinetics.pth.tar")
+        # pretrained_dict = torch.load("./ECO_JH/ECO-pytorch/models/ECO_Lite_rgb_model_Kinetics.pth.tar")
 
         # original
-        # if args.net_modelECO is not None:
-        #     pretrained_dict = torch.load(args.net_modelECO)
-        #     print(("=> loading model-finetune: '{}'".format(args.net_modelECO)))
-        # else:
-        #     pretrained_dict = torch.load("models/eco_lite_rgb_16F_kinetics_v2.pth.tar")
-        #     print(("=> loading model-finetune-url: '{}'".format("models/eco_lite_rgb_16F_kinetics_v2.pth.tar")))
+        if args.net_modelECO is not None:
+            pretrained_dict = torch.load(args.net_modelECO)
+            print(("=> loading model-finetune: '{}'".format(args.net_modelECO)))
+        else:
+	    # for cpu
+            pretrained_dict = torch.load("/app/ECO-torch/models/ECO_Lite_rgb_model_Kinetics.pth.tar", map_location='cpu')
+            # for gpu
+	    # pretrained_dict = torch.load("/app/ECO-torch/models/ECO_Lite_rgb_model_Kinetics.pth.tar") # for gpu
+            print(("=> loading model-finetune-url: '{}'".format("models/eco_lite_rgb_16F_kinetics_v2.pth.tar")))
 
 
         new_state_dict = {k: v for k, v in pretrained_dict['state_dict'].items() if (k in model_dict) and (v.size() == model_dict[k].size())}

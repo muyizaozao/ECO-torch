@@ -15,8 +15,8 @@ mainFolder="net_runs"
 subFolder="ECO_lite_finetune_UCF101_run1"
 snap_pref="eco_lite_finetune_UCF101"
 
-train_path="data/ucf101_splits/trainlist01.txt"
-val_path="data/ucf101_splits/testlist01.txt"
+train_path="data/UCF101/lists/ucf101_rgb_train_split_1.txt"
+val_path="data/UCF101/lists/ucf101_rgb_val_split_1.txt"
 
 #############################################
 #--- training hyperparams ---
